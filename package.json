@@ -1,0 +1,58 @@
+{
+  "name": "upload_image",
+  "version": "1.0.0",
+  "description": "\"# fiti-backend\" \r #\u0000 \u0000f\u0000i\u0000t\u0000i\u0000-\u0000f\u0000a\u0000s\u0000h\u0000-\u0000h\u0000e\u0000r\u0000o\u0000k\u0000u\u0000\r\u0000 \u0000",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client",
+    "test": "mocha --exit ./test/index.test.js",
+    "coverage": "nyc --reporter=lcov --reporter=text mocha ./test/index.test.js && nyc report --reporter=text-summary",
+    "sonar": "sonar-scanner"
+  },
+  "keywords": [],
+  "author": "ANDRIAMIHAJA Joelson Emile",
+  "license": "ISC",
+  "dependencies": {
+    "@stripe/stripe-js": "^1.52.1",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-handlebars": "^7.0.4",
+    "express-session": "^1.17.3",
+    "fs": "^0.0.1-security",
+    "helmet": "^6.2.0",
+    "moment": "^2.29.4",
+    "mongodb": "^6.2.0",
+    "mongoose": "^8.0.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^2.0.22",
+    "socket.io": "^4.7.2",
+    "stripe": "^12.4.0",
+    "validator": "^13.11.0"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "istanbul": "^0.4.5",
+    "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
+    "sinon": "^17.0.1",
+    "sonarqube-scanner": "^3.3.0",
+    "supertest": "^6.3.3"
+  },
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/emilejoelson/fiti-fash-heroku.git"
+  },
+  "bugs": {
+    "url": "https://github.com/emilejoelson/fiti-fash-heroku/issues"
+  },
+  "homepage": "https://github.com/emilejoelson/fiti-fash-heroku#readme"
+}
