@@ -1,19 +1,30 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io'); // Import Socket.IO
+const socketIo = require('socket.io');
 const bodyParser = require('body-parser');
 const session = require('express-session');
 const cors = require('cors');
-const dotenv = require('dotenv').config();
-const Stripe = require('stripe');
 const path = require('path');
+const helmet = require('helmet');
 
 // Local imports
 const db = require('./database/db.js');
 const rout = require('./routes/router.js');
 const app = express();
+
+// Use helmet middleware with adjusted Content Security Policy
+app.use(
+  helmet.contentSecurityPolicy({
+    directives: {
+      scriptSrc: ["'self'", 'https://js.stripe.com', 'https://www.youtube.com'],
+      frameSrc: ["'self'", 'https://js.stripe.com', 'https://maps.google.com/', 'https://www.google.com/', 'https://www.youtube.com', 'http://13.49.49.167'], // Allow HTTP source
+      imgSrc: ["'self'", 'https://hamart-shop.vercel.app', 'data:', 'https://lh3.googleusercontent.com', 'http://localhost:4000', 'http://51.20.41.153'], // Allow HTTP source
+    },
+  })
+);
+
 const server = http.createServer(app);
-const io = socketIo(server); // Create a Socket.IO server instance and attach it to the server
+const io = socketIo(server);
 
 // Attach io to the app
 app.io = io;
@@ -39,17 +50,16 @@ app.use(
     saveUninitialized: true,
     resave: true,
     cookie: {
-      sameSite: 'None', // Set to 'None' for cross-site cookies
-      secure: true, // Enable secure cookies
+      sameSite: 'None',
+      secure: true,
     },
   })
 );
 
-
 app.use((req, res, next) => {
   res.locals.message = req.session.message;
   delete req.session.message;
-  req.app.io = io; // Attach io to req.app
+  req.app.io = io;
   next();
 });
 
@@ -63,42 +73,46 @@ app.use(rout);
 console.log('Stripe Secret Key: ' + process.env.STRIPE_SECRET_KEY);
 console.log('Admin email: ' + process.env.REACT_APP_ADMIN_EMAIL);
 
+// Handle CORS preflight requests
+app.options('*', cors());
+
 io.on('connection', (socket) => {
   console.log('A client connected');
 
-  // Handle disconnections
   socket.on('disconnect', () => {
     console.log('A client disconnected');
   });
 
-  // Handle custom events from clients
   socket.on('notification', (data) => {
-    // Handle incoming notifications here
     console.log('Received notification:', data);
-
-    // You can broadcast the notification to other connected clients if needed
     io.emit('notification', data);
   });
 });
 
-if(process.env.NODE_ENV === "production"){
-  app.use(express.static(path.join(__dirname,'/client/build')));
+if (process.env.NODE_ENV === "production") {
+  const staticPath = path.join(__dirname, '/client/build');
+
+  app.use(express.static(staticPath, {
+    setHeaders: (res, path, stat) => {
+      if (path.endsWith('.js')) {
+        res.set('Content-Type', 'application/javascript');
+      }
+    },
+  }));
 
   app.get("*",(req,res) => {
     res.sendFile(path.join(__dirname,'client','build','index.html'));
-  })
-}
-else {
+  });
+} else {
   app.get("/",(req,res) => {
     res.send("Api running");
-  })
+  });
 }
 
+const port = process.env.PORT || 4000;
 
-
-server.listen(process.env.PORT, () => {
-  console.log('Server is running on port ' +process.env.PORT);
+server.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
-
 
 module.exports = app;
